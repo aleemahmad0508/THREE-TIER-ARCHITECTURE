@@ -3,23 +3,39 @@ from models import db, APIData
 import requests
 import time
 import threading
-import config
+
 from flask_cors import CORS
+from dotenv import load_dotenv
+from config import Config
+from sqlalchemy.exc import OperationalError
+
+load_dotenv()
 
 app = Flask(__name__)
-app.config.from_object(config.Config)
+app.config.from_object(Config)
 
-CORS(app, resources={r"/*": {"origins": "*"}})
+CORS(app)
 
 db.init_app(app)
 
+
+# 🚀 FIX: Safe DB initialization (prevents crash)
 with app.app_context():
-    db.create_all()
+    max_retries = 10
+
+    for i in range(max_retries):
+        try:
+            db.create_all()
+            print("✅ Database connected & tables created")
+            break
+        except OperationalError:
+            print(f"⏳ DB not ready, retrying... ({i+1}/{max_retries})")
+            time.sleep(3)
 
 
 @app.route("/")
 def home():
-    return jsonify({"message": "API Caller App Running 🚀"})
+    return jsonify({"message": "PostgreSQL API Caller Running 🚀"})
 
 
 def call_api_task(url, frequency, duration):
@@ -101,4 +117,4 @@ def clear_data():
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)  # ✅ debug ON for dev
+    app.run(host="0.0.0.0", port=5000, debug=True)

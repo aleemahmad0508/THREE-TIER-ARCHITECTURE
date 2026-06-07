@@ -4,6 +4,8 @@ from datetime import datetime
 db = SQLAlchemy()
 
 class APIData(db.Model):
+    __tablename__ = "api_data"
+
     id = db.Column(db.Integer, primary_key=True)
 
     response = db.Column(db.JSON, nullable=False)

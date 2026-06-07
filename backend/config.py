@@ -1,13 +1,9 @@
 import os
+from dotenv import load_dotenv
 
-BASE_DIR = os.path.abspath(os.path.dirname(__file__))
-
-# ensure instance folder exists
-os.makedirs(os.path.join(BASE_DIR, "instance"), exist_ok=True)
+# This physically loads the variables from the .env file into your environment
+load_dotenv() 
 
 class Config:
-    SQLALCHEMY_DATABASE_URI = os.getenv(
-        "DATABASE_URL",
-        f"sqlite:///{os.path.join(BASE_DIR, 'instance', 'data.db')}"
-    )
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
     SQLALCHEMY_TRACK_MODIFICATIONS = False

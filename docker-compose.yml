@@ -1,4 +1,4 @@
-version: "3.9"
+
 
 services:
   backend:
@@ -11,7 +11,10 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - FLASK_ENV=development
+      FLASK_ENV: development
+      DATABASE_URL: postgresql+psycopg2://postgres:password@db:5432/apidb
+    depends_on:
+      - db
     command: flask run --host=0.0.0.0 --port=5000
     networks:
       - app-network
@@ -27,12 +30,31 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
+      # 🔥 FIX IS HERE
       - VITE_API_URL=http://localhost:5000
     depends_on:
       - backend
     networks:
       - app-network
 
+  db:
+    image: postgres:16
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: apidb
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app-network
+
 networks:
   app-network:
     driver: bridge
+
+volumes:
+  pgdata:
